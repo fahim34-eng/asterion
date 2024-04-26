@@ -47,16 +47,16 @@ jobs:
         with:
           context: ./
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/dumb-backend:${{ github.run_number }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/astarion-backend:${{ github.run_number }}
 
       - name: Checkout Deployment Repo
         uses: actions/checkout@v3
         with:
-          repository: IIT-Hackathon/deployments
+          repository: ***/deployments # needs change here
           token: ${{secrets.PAT_TOKEN}}
       - name: Modify Deployment File
         run: |
-          sed -i 's/dumb-backend:.*/dumb-backend:${{ github.run_number }}/g' stage-backend/docker-compose.yml
+          sed -i 's/astarion-backend:.*/astarion-backend:${{ github.run_number }}/g' stage-backend/docker-compose.yml
 
       - name: Push changes of deployment
         run: |
@@ -64,7 +64,7 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Deployment update"
-          git push https://$USERNAME:$REPO_KEY@github.com/IIT-Hackathon/deployments.git
+          git push https://$USERNAME:$REPO_KEY@github.com/****/deployments.git # needs change here
         env:
           REPO_KEY: ${{secrets.PAT_TOKEN}}
           USERNAME: github-actions[bot]

@@ -54,12 +54,12 @@ jobs:
         with:
           context: ./
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/dumb-backend:${{ github.run_number }}, ${{ secrets.DOCKERHUB_USERNAME }}/dumb-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/astarion-backend:${{ github.run_number }}, ${{ secrets.DOCKERHUB_USERNAME }}/astarion-backend:latest
 
       - name: Trigger deployment on deployment repo
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          owner: IIT-Hackathon
+          owner: *** # needs change here
           repo: deployments
           github_token: ${{ secrets.PAT_TOKEN }}
           github_user: reduan2660

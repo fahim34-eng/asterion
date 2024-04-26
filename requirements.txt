@@ -9,3 +9,4 @@ passlib
 python-dotenv
 pytest
 python-multipart
+boto3

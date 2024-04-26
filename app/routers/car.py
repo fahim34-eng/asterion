@@ -6,6 +6,17 @@ from ..schemas import User, ResponseUser, Car, CarSellOffer
 from passlib.context import CryptContext
 from typing import List
 from .. import models, oauth2, utils
+import boto3
+import tempfile
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
+s3_client = boto3.client('s3',
+    aws_access_key_id = os.getenv("AWS_ACCESS_KEY"),
+    aws_secret_access_key = os.getenv("AWS_SECRET_KEY"),
+                         )
 
 import logging
 
@@ -26,15 +37,21 @@ def create_car(car : Car, db : Session = Depends(get_db), user : User = Depends(
     logging.info("POST request at '/cars'")
     print(user.id)
     new_car.owner_id = user.id
-    print(new_car)
+    new_car.image_url = "https://astarion-images.s3.us-east-2.amazonaws.com/" + car.image_url
     
     db.add(new_car)
     db.commit()
     db.refresh(new_car)
     logging.info("CAR created successfully")
+    
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(car.image_data)
+        tmp_file_path = tmp_file.name
+
+    response = s3_client.upload_file(tmp_file_path, "astarion-images", car.image_url)
     return new_car
 
-@router.get("/all", response_model=List[Car])
+@router.get("/all")
 def get_cars(db : Session = Depends(get_db), user : User = Depends(oauth2.get_current_user)) :
     logging.info("GET request at '/cars/all'")
     cars = db.query(models.Car).filter(models.Car.owner_id != user.id).all()

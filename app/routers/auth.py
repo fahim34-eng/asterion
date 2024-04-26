@@ -39,6 +39,8 @@ def login_user(user_credentials: dict = Body(...), db: Session = Depends(get_db)
         "access_token": access_token,
         "token_type": "Bearer",
         "id" : user.id,
-        "role" : user.role
+        "role" : user.role,
+        "name" : user.name,
+        "email" : user.email
      }
 
