@@ -8,5 +8,7 @@ COPY . .
 
 ARG URL
 ENV DB_URL=$DB_URL
+ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 
 CMD ["uvicorn", "app.main:app", "--port=8000", "--host=0.0.0.0"]

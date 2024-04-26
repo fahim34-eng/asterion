@@ -3,7 +3,7 @@ name: Pull Request To Develop
 on:
   pull_request:
     branches:
-      - develop
+      - dev
 
 jobs:
   test:
@@ -13,27 +13,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Send notification to slack that action triggered
-        continue-on-error: true
-        id: slack-trigger
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "BACKEND PR to DEV STARTED: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "BACKEND PR to DEV STARTED: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      # - name: Send notification to slack that action triggered
+      #   continue-on-error: true
+      #   id: slack-trigger
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "BACKEND PR to DEV STARTED: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+      #         "blocks": [
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn",
+      #               "text": "BACKEND PR to DEV STARTED: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+      #             }
+      #           }
+      #         ]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       # Check if there was changes in alembic directory
       - name: Get changed files in the alembic folder
@@ -56,6 +56,8 @@ jobs:
 
         run: |
           echo -e "DB_URL=${{ secrets.DEV_DB_URL }}" > ./.env
+          echo -e "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" > ./.env
+          echo -e "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" > ./.env
           docker build -t backend .
           docker run -d -p 8000:8000 backend
 
@@ -72,12 +74,12 @@ jobs:
         run: |
           pytest
 
-      - name: SonarQube Scan
-        continue-on-error: true
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # - name: SonarQube Scan
+      #   continue-on-error: true
+      #   uses: sonarsource/sonarqube-scan-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Alembic Downgrade if tests Failed and there was changes in alembic directory
         continue-on-error: true
@@ -86,24 +88,24 @@ jobs:
           echo -e "DB_URL=${{ secrets.DEV_DB_URL }}" > ./.env
           alembic downgrade -1
 
-      - name: Send custom JSON data to Slack workflow
-        continue-on-error: true
-        id: slack-result
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "BACKEND PR to DEV RESULT: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "BACKEND PR to DEV RESULT: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      # - name: Send custom JSON data to Slack workflow
+      #   continue-on-error: true
+      #   id: slack-result
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "BACKEND PR to DEV RESULT: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+      #         "blocks": [
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn",
+      #               "text": "BACKEND PR to DEV RESULT: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+      #             }
+      #           }
+      #         ]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
